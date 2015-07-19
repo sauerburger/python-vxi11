@@ -445,7 +445,7 @@ class Instrument(object):
             flags = OP_FLAG_TERMCHAR_SET
             term_char = str(self.term_char).encode('utf-8')[0]
 
-        read_data = b''
+        read_data = bytearray()
 
         while reason & (RX_END | RX_CHR) == 0:
             error, reason, data = self.client.device_read(self.link, read_len, self.timeout, self.lock_timeout, flags, term_char)
@@ -453,7 +453,7 @@ class Instrument(object):
             if error:
                 raise Vxi11Exception(error, 'read')
 
-            read_data += data
+            read_data.extend(data)
 
             if num > 0:
                 num = num - len(data)
@@ -462,7 +462,7 @@ class Instrument(object):
                 if num < read_len:
                     read_len = num
 
-        return read_data
+        return bytes(read_data)
 
     def ask_raw(self, data, num=-1):
         "Write then read binary data"
